@@ -1,0 +1,144 @@
+package catalogoAutos;
+
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JOptionPane;
+
+
+public class CatalogoAutomoviles extends JFrame {
+
+    private List<Automovil> automoviles;
+    private JTextField txtBusqueda;
+    private JButton btnBuscar;
+    private JPanel panelAutomoviles;
+
+    public CatalogoAutomoviles() {
+        setTitle("Catálogo de Automóviles");
+        setSize(800, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        getContentPane().setLayout(new BorderLayout());
+
+
+        automoviles = new ArrayList<>();
+        automoviles.add(new Automovil("Toyota Corolla", "Sedán","$ 255,455.00", "imagen_corolla.jpg"));
+        automoviles.add(new Automovil("Ford Mustang", "Deportivo", "$ 487,980.00", "imagen_mustang.jpg"));
+        automoviles.add(new Automovil("Volkswagen Golf", "Hatchback","$320,098.00", "imagen_golf.jpg"));
+        automoviles.add(new Automovil("Toyota Yaris", "Hatchback","$ 307,900.00", "imagen_yaris.jpg"));
+        automoviles.add(new Automovil("Ford Fiesta", "Deportivo", "$ 241,300.00", "imagen_fiesta.jpg"));
+        automoviles.add(new Automovil("Volkswagen Jetta", "Sedán","$ 399,990.00", "imagen_jetta.jpg"));
+        automoviles.add(new Automovil("Nissan Sentra", "Sedán","$ 396,900.00", "imagen_sentra.jpg"));
+        automoviles.add(new Automovil("Nissan Versa", "Hatchback", "$ 487,980.00", "imagen_versa.jpg"));
+        automoviles.add(new Automovil("Honda Civic", "Sedán","$ 545,900.00", "imagen_civic.jpg"));
+        automoviles.add(new Automovil("Honda Accord", "Sedán","$ 779,900.00", "imagen_accord.jpg"));
+        automoviles.add(new Automovil("Seat Ibiza", "Hatchback", "$ 342,900.00", "imagen_ibiza.jpg"));
+        automoviles.add(new Automovil("Seat Leon", "Sedán","$ 590,090.00", "imagen_leon.jpg"));
+
+    
+        JPanel panelBusqueda = new JPanel(new FlowLayout());
+        txtBusqueda = new JTextField(20);
+        btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String filtro = txtBusqueda.getText();
+                filtrarAutomoviles(filtro);
+            }
+        });
+      
+        panelBusqueda.add(txtBusqueda);
+        panelBusqueda.add(btnBuscar);
+        getContentPane().add(panelBusqueda, BorderLayout.NORTH);
+
+      
+        panelAutomoviles = new JPanel(new GridLayout(0, 3, 10, 10));
+        cargarAutomoviles(automoviles);
+        getContentPane().add(panelAutomoviles, BorderLayout.CENTER);
+        panelAutomoviles.setBackground(new Color(0, 128, 192));
+        
+        JScrollPane scrollPane = new JScrollPane(panelAutomoviles);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+
+
+        setVisible(true);
+    }
+    
+    
+    private void cargarAutomoviles(List<Automovil> automoviles) {
+        panelAutomoviles.removeAll();
+
+        for (Automovil automovil : automoviles) {
+            JPanel panelAutomovil = new JPanel(new BorderLayout());
+            JLabel lblImagen = new JLabel();
+            BufferedImage resizedImage = resizeImage(automovil.getImagen(), 200, 150);
+            lblImagen.setIcon(new ImageIcon(resizedImage));
+            JLabel lblNombre = new JLabel(automovil.getNombre());
+            JLabel lblTipo = new JLabel(automovil.getTipo());
+            JLabel lblPrecio= new JLabel(automovil.getPrecio());
+
+
+            panelAutomovil.add(lblImagen, BorderLayout.CENTER);
+            panelAutomovil.add(lblNombre, BorderLayout.NORTH);
+            
+           
+
+            panelAutomovil.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                  
+                    JOptionPane.showMessageDialog(CatalogoAutomoviles.this, automovil.toString(), "Información del Automóvil", JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
+
+            panelAutomoviles.add(panelAutomovil);
+        }
+
+        panelAutomoviles.revalidate();
+        panelAutomoviles.repaint();
+    }
+    private void filtrarAutomoviles(String filtro) {
+        List<Automovil> automovilesFiltrados = new ArrayList<>();
+
+        for (Automovil automovil : automoviles) {
+            if (automovil.getNombre().toLowerCase().contains(filtro.toLowerCase()) || automovil.getTipo().toLowerCase().contains(filtro.toLowerCase())|| automovil.getPrecio().toLowerCase().contains(filtro.toLowerCase())) {
+                automovilesFiltrados.add(automovil);
+            }
+        }
+
+        cargarAutomoviles(automovilesFiltrados);
+    }
+    private BufferedImage resizeImage(String imagePath, int width, int height) {
+        try {
+            File originalFile = new File(imagePath);
+            BufferedImage originalImage = ImageIO.read(originalFile);
+
+            Image resizedImage = originalImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+
+            BufferedImage resizedBufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = resizedBufferedImage.createGraphics();
+            g2d.drawImage(resizedImage, 0, 0, null);
+            g2d.dispose();
+
+            return resizedBufferedImage;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                CatalogoAutomoviles catalogo = new CatalogoAutomoviles();
+            }
+        });
+    }
+}
