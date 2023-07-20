@@ -1,10 +1,14 @@
 package catalogoAutos;
 
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
+import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,12 +17,14 @@ import java.util.List;
 import javax.swing.JOptionPane;
 
 
+
 public class CatalogoAutomoviles extends JFrame {
 
-    private List<Automovil> automoviles;
+    private static List<Automovil> automoviles;
     private JTextField txtBusqueda;
     private JButton btnBuscar;
     private JPanel panelAutomoviles;
+    
 
     public CatalogoAutomoviles() {
         setTitle("Catálogo de Automóviles");
@@ -43,7 +49,7 @@ public class CatalogoAutomoviles extends JFrame {
         automoviles.add(new Automovil("Seat Leon", "Sedán","$ 590,090.00", "imagen_leon.jpg"));
 
     
-        JPanel panelBusqueda = new JPanel(new FlowLayout());
+        JPanel panelBusqueda = new JPanel(); 
         txtBusqueda = new JTextField(20);
         btnBuscar = new JButton("Buscar");
         btnBuscar.addActionListener(new ActionListener() {
@@ -52,9 +58,15 @@ public class CatalogoAutomoviles extends JFrame {
                 filtrarAutomoviles(filtro);
             }
         });
-      
+        JButton btnAgregarAutomovil = new JButton("Agregar Automóvil");
+        btnAgregarAutomovil.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                VentanaAgregarAutomovil ventanaAgregar = new VentanaAgregarAutomovil();
+            }
+        });
         panelBusqueda.add(txtBusqueda);
         panelBusqueda.add(btnBuscar);
+        panelBusqueda.add(btnAgregarAutomovil);
         getContentPane().add(panelBusqueda, BorderLayout.NORTH);
 
       
@@ -88,21 +100,40 @@ public class CatalogoAutomoviles extends JFrame {
             panelAutomovil.add(lblImagen, BorderLayout.CENTER);
             panelAutomovil.add(lblNombre, BorderLayout.NORTH);
             
-           
-
-            panelAutomovil.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-                  
-                    JOptionPane.showMessageDialog(CatalogoAutomoviles.this, automovil.toString(), "Información del Automóvil", JOptionPane.INFORMATION_MESSAGE);
+            JButton btnInfo = new JButton("Info");
+            btnInfo.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    mostrarInformacion(automovil);
                 }
             });
-
+            panelAutomovil.add(btnInfo, BorderLayout.SOUTH);
             panelAutomoviles.add(panelAutomovil);
         }
 
         panelAutomoviles.revalidate();
         panelAutomoviles.repaint();
     }
+    public static void agregarAutomovil(String nombre, String tipo, String precio, String imagen) {
+        automoviles.add(new Automovil(nombre, tipo, precio, imagen));
+        CatalogoAutomoviles catalogo = new CatalogoAutomoviles(); 
+        catalogo.cargarAutomoviles(automoviles); 
+    }
+    private void cargarImagen() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Seleccionar imagen");
+        int seleccion = fileChooser.showOpenDialog(this);
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            String imagePath = file.getAbsolutePath();
+            ImageIcon icon = new ImageIcon(imagePath);
+            
+         
+        }
+    }
+    private void mostrarInformacion(Automovil automovil) {
+        JOptionPane.showMessageDialog(this, automovil.toString(), "Información del Automóvil", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     private void filtrarAutomoviles(String filtro) {
         List<Automovil> automovilesFiltrados = new ArrayList<>();
 
@@ -114,7 +145,7 @@ public class CatalogoAutomoviles extends JFrame {
 
         cargarAutomoviles(automovilesFiltrados);
     }
-    private BufferedImage resizeImage(String imagePath, int width, int height) {
+    public static BufferedImage resizeImage(String imagePath, int width, int height) {
         try {
             File originalFile = new File(imagePath);
             BufferedImage originalImage = ImageIO.read(originalFile);
